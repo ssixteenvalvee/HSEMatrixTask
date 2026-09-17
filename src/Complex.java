@@ -5,9 +5,8 @@ public class Complex {
     private final double Im;
 
     // constructor
-    Complex() {Re = 0; Im = 0;}
+    Complex() {Re = 0.0; Im = 0.0;}
     Complex(double real, double imaginary) {Re = real; Im = imaginary;}
-
     // get
     public double getRe() {
         return this.Re;
@@ -16,45 +15,47 @@ public class Complex {
         return this.Im;
     }
     // methods
-    // every Complex obj is unique:
-    // Complex num = new Complex(r, i);
-    // Complex abs_num = num.absolute();
-    // -> thus, we had a num and now we jave another obj, but it is absolute num
-    // (maybe it is a wrong && bad approach? IDK)
+    // Immutable: every operation returns a new Complex;
+    // the receiver is never modified!
+
+    public boolean isZero() {
+        return Double.compare(Re, 0.0) == 0 && Double.compare(Im, 0.0) == 0;
+    }
+
     public Complex conjugate() {
         return new Complex(this.Re, -this.Im);
     }
 
-    public Complex sumwith(Complex other) {
+    public Complex plus(Complex other) {
         return new Complex(this.Re + other.Re, this.Im + other.Im);
     }
 
-    public Complex diffwith(Complex other) {
+    public Complex minus(Complex other) {
         return new Complex(this.Re - other.Re, this.Im - other.Im);
     }
 
-    public Complex productwith(Complex other) {
+    public Complex prod(Complex other) {
         return new Complex(this.Re * other.Re - this.Im * other.Im, this.Im * other.Re + this.Re * other.Im);
     }
 
-    public Complex divwith(Complex other) {
-        double divisor = other.Re * other.Re + other.Im * other.Im; // we do not need to work with fractions, I guess.
-        if (divisor == 0) {
+    public Complex div(Complex other) {
+        double divisor = other.Re * other.Re + other.Im * other.Im;
+        if (other.Re == 0.0 && other.Im == 0.0) {
             throw new ArithmeticException("DivisionByZero.");
         } else {
-            double new_Re = (this.Re * other.Re + this.Im * other.Im);
-            double new_Im = (this.Im * other.Re - this.Re * other.Im);
+            double new_Re = (this.Re * other.Re + this.Im * other.Im) / divisor;
+            double new_Im = (this.Im * other.Re - this.Re * other.Im) / divisor;
             return new Complex(new_Re, new_Im);
         }
     }
 
-    public long abs() { // |z|
+    public long abs_C() { // |z|
         return (long)Math.sqrt(Math.pow(this.Re, 2) + Math.pow(this.Im, 2));
         // long cause
     }
 
-    public boolean is_equalswith(Complex other) {
-        return this.Re == other.Re && this.Im == other.Im;
+    public boolean is_equals(Complex other) {
+        return Double.compare(Re, other.Re) == 0 && Double.compare(Im, other.Im) == 0;
     }
 
     public String toStr() {
