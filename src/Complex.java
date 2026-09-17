@@ -1,16 +1,18 @@
+import java.lang.Math.*;
+
 public class Complex {
-    private final int Re;
-    private final int Im;
+    private final double Re;
+    private final double Im;
 
     // constructor
     Complex() {Re = 0; Im = 0;}
-    Complex(int real, int imaginary) {Re = real; Im = imaginary;}
+    Complex(double real, double imaginary) {Re = real; Im = imaginary;}
 
     // get
-    public int getRe() {
+    public double getRe() {
         return this.Re;
     }
-    public int getIm() {
+    public double getIm() {
         return this.Im;
     }
     // methods
@@ -36,14 +38,19 @@ public class Complex {
     }
 
     public Complex divwith(Complex other) {
-        int divisor = other.Re * other.Re + other.Im * other.Im; // we do not need to work with fractions, I guess.
+        double divisor = other.Re * other.Re + other.Im * other.Im; // we do not need to work with fractions, I guess.
         if (divisor == 0) {
             throw new ArithmeticException("DivisionByZero.");
         } else {
-            int new_Re = (this.Re * other.Re + this.Im * other.Im);
-            int new_Im = (this.Im * other.Re - this.Re * other.Im);
+            double new_Re = (this.Re * other.Re + this.Im * other.Im);
+            double new_Im = (this.Im * other.Re - this.Re * other.Im);
             return new Complex(new_Re, new_Im);
         }
+    }
+
+    public long abs() { // |z|
+        return (long)Math.sqrt(Math.pow(this.Re, 2) + Math.pow(this.Im, 2));
+        // long cause
     }
 
     public boolean is_equalswith(Complex other) {
@@ -51,11 +58,13 @@ public class Complex {
     }
 
     public String toStr() {
-        if (this.Im >= 0) {
+        if (this.Im > 0) {
             return this.Re + " + " + this.Im + "i";
-        } else {
+        } else if (this.Im < 0) {
             return this.Re + " - " + (this.Im * -1) + "i";
         }
+        else {
+            return this.Re + "";
+        }
     }
-
 }
