@@ -16,6 +16,21 @@ public class Matrix {
         Rows = r;
         Cols = c;
         A = new Complex[Rows][Cols];
+        for (int i = 0; i < Rows; i++) {
+            for (int j = 0; j < Cols; j++) {
+                A[i][j] = new Complex(0, 0);
+            }
+        }
+    }
+    Matrix(int r, int c, Complex[][] M) {
+        Rows = r;
+        Cols = c;
+        A = new Complex[r][c];
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                A[i][j] = M[i][j];
+            }
+        }
     }
 
     // get
@@ -30,7 +45,7 @@ public class Matrix {
         Scanner scanner = new Scanner(System.in);
         for (int row = 0; row < Rows; row++) {
             for (int col = 0; col < Cols; col++) {
-                System.out.println("Enter Re and Im: ");
+                System.out.print("Enter Re and Im: ");
                 double re = scanner.nextDouble();
                 double im = scanner.nextDouble();
                 Complex c = new Complex(re, im);
@@ -52,37 +67,47 @@ public class Matrix {
         }
     }
 
+    public void show() {
+        for (int i = 0; i < this.Rows; i++) {
+            for (int j = 0; j < this.Cols; j++) {
+                System.out.print(this.A[i][j].toString() + "\t");
+            }
+            System.out.println();
+        }
+    }
+
     public Complex detGauss() {
         Complex det = new Complex(1.0, 0.0);
         int n = A.length;
+        Complex[][] a = A.clone();
         if (Rows != Cols) {
             throw new IllegalArgumentException("This operation may be done only with square matrix.");
         }
         for (int i = 0; i < n; i++) {
             int row = i;
             for (int k = i + 1; k < n; k++) {
-                if ((A[k][i]).abs_C() > (A[row][i]).abs_C()) {
+                if ((a[k][i]).abs_C() > (a[row][i]).abs_C()) {
                     row = k;
                 }
             }
-            if ((A[row][i]).isZero()) {
+            if ((a[row][i]).isZero()) {
                 return new Complex(0.0, 0.0);
             }
             if (row != i) {
                 for (int j=0; j < n; j++) {
-                    Complex temp = A[row][j];
-                    A[row][j] = A[i][j];
-                    A[i][j] = temp;
+                    Complex temp = a[row][j];
+                    a[row][j] = a[i][j];
+                    a[i][j] = temp;
                 }
                 det = new Complex(-det.getRe(), -det.getIm());
             }
             for (int k = i + 1; k < n; k++) {
-                Complex dived = (A[k][i]).div(A[i][i]);
+                Complex dived = (a[k][i]).div(a[i][i]);
                 for (int j = i; j < n; j++) {
-                    A[k][j] = A[k][j].minus(dived.prod(A[i][j]));
+                    a[k][j] = a[k][j].minus(dived.prod(A[i][j]));
                 }
             }
-            det = det.prod(A[i][i]);
+            det = det.prod(a[i][i]);
         }
         return det;
     }
@@ -137,25 +162,53 @@ public class Matrix {
         return C;
     }
 
-    public Matrix divw(Matrix B) {
-        if (this.Cols != B.Rows) {
-            throw new IllegalArgumentException( //
-                    "Cannot divide: A is " + this.Rows + "x" + this.Cols +
-                            ", B is " + B.Rows + "x" + B.Cols +
-                            ". Need A.Cols == B.Rows.");
-        }
-        Matrix C = new Matrix(this.Rows, B.getCols());
-        Complex[][] a = this.A; // massive - matrix
-        Complex[][] b = B.getA(); // massive - matrix
+    public Matrix scalarProd(Complex scalar) {
+        Matrix scA = new Matrix(this.Rows, this.Cols); // clone
         for (int i = 0; i < this.Rows; i++) {
-            for (int j = 0; j < B.getCols(); j++) {
-                Complex cij = new Complex(0, 0);
-                for (int k = 0; k < this.Cols; k++) {
-                    cij = cij.plus(a[i][k].div(b[k][j]));
-                }
-                C.set(cij, i, j); // value, row, col;
+            for (int j = 0; j < this.Cols; j++) {
+                scA.set(this.A[i][j].prod(scalar), i, j);
             }
         }
-        return C;
+        return scA;
     }
+
+    public Matrix transposed() {
+        Matrix A_transposed = new Matrix(this.Cols, this.Rows); // A dim(2 x 3), A_tr dim(3 x 2)
+        Complex[][] a = this.A;
+        for (int i = 0; i < this.Rows; i++) {
+            for (int j = 0; j < this.Cols; j++) {
+                A_transposed.set(a[i][j], j, i);
+            }
+        }
+        return A_transposed;
+    }
+
+    public Matrix inversed() {
+        if (this.Rows != this.Cols) {
+            throw new IllegalArgumentException("Only for square matrix.");
+        }
+        Complex det = this.detGauss();
+        if (det.isZero()) {
+            throw new ArithmeticException("The determinant is zero. A^-1 do not exists.");
+        }
+        if (this.Rows == 2 && this.Cols == 2) {
+            Matrix C = new Matrix(this.Rows, this.Cols);
+            C.set(this.A[1][1], 0, 0);
+            C.set(this.A[0][1].prod(new Complex(-1, 0)), 0, 1);
+            C.set(this.A[1][0].prod(new Complex(-1, 0)), 1, 0);
+            C.set(this.A[0][0], 1, 1);
+            // here i have to (1 / (ad - bc)). Maybe I could not do new Complex(1, 0)?
+            Complex divisor = A[0][0].prod(A[1][1]).minus(A[0][1].prod(A[1][0]));
+            Complex scalar = new Complex(1, 0).div(divisor);
+            return C.scalarProd(scalar);
+        }
+        // ...
+        return null;
+    }
+
+    /*
+    public Matrix divw(Matrix B) {
+
+    }
+     */
 }

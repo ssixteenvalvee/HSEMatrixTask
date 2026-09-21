@@ -7,8 +7,13 @@
 
 public class Main {
     public static void main(String[] args) {
-        Matrix M = new Matrix(3, 3);
-        M.fillRand(0, 10);
-        System.out.println(M.detGauss().toStr());
+        Matrix M = new Matrix(2, 3);
+        M.set(new Complex(3, 4), 0, 0);
+        M.set(new Complex(1, 2), 0, 1);
+        M.set(new Complex(4, 2), 0, 2);
+        M.show();
+        System.out.println();
+        Matrix M_tr = M.transposed();
+        M_tr.show();
     }
 }

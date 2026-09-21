@@ -54,11 +54,15 @@ public class Complex {
         // long cause
     }
 
-    public boolean is_equals(Complex other) {
+    public boolean equals(Complex other) {
         return Double.compare(Re, other.Re) == 0 && Double.compare(Im, other.Im) == 0;
     }
 
-    public String toStr() {
+    @Override
+    public String toString() {
+        if (this.isZero()) {
+            return "0";
+        }
         if (this.Im > 0) {
             return this.Re + " + " + this.Im + "i";
         } else if (this.Im < 0) {
@@ -67,5 +71,22 @@ public class Complex {
         else {
             return this.Re + "";
         }
+    }
+    // because it is got annoying.
+    public Complex plus(double real) {
+        return new Complex(this.Re + real, this.Im);
+    }
+
+    public Complex minus(double real) {
+        return new Complex(this.Re - real, this.Im);
+    }
+
+    public Complex prod(double real) {
+        return new Complex(this.Re * real, this.Im * real);
+    }
+
+    public Complex div(double real) {
+        if (real == 0.0) throw new ArithmeticException("Division by zero.");
+        return new Complex(this.Re / real, this.Im / real);
     }
 }
