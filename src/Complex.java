@@ -7,6 +7,10 @@ public class Complex {
     // constructor
     Complex() {Re = 0.0; Im = 0.0;}
     Complex(double real, double imaginary) {Re = real; Im = imaginary;}
+
+    public static final Complex ZERO = new Complex(0, 0);
+    public static final Complex ONE = new Complex(1, 0);
+
     // get
     public double getRe() {
         return this.Re;
@@ -49,8 +53,8 @@ public class Complex {
         }
     }
 
-    public long abs_C() { // |z|
-        return (long)Math.sqrt(Math.pow(this.Re, 2) + Math.pow(this.Im, 2));
+    public double abs_C() { // |z|
+        return (double)Math.sqrt(Math.pow(this.Re, 2) + Math.pow(this.Im, 2));
         // long cause
     }
 
@@ -60,17 +64,10 @@ public class Complex {
 
     @Override
     public String toString() {
-        if (this.isZero()) {
-            return "0";
-        }
-        if (this.Im > 0) {
-            return this.Re + " + " + this.Im + "i";
-        } else if (this.Im < 0) {
-            return this.Re + " - " + (this.Im * -1) + "i";
-        }
-        else {
-            return this.Re + "";
-        }
+        if (isZero()) return String.format("%d", 0);
+        if (Im > 0) return String.format("%.1f + %.1fi", Re, Im);
+        if (Im < 0) return String.format("%.1f - %.1fi", Re, -Im);
+        return String.format("%.1f", Re);
     }
     // because it is got annoying.
     public Complex plus(double real) {
@@ -88,5 +85,8 @@ public class Complex {
     public Complex div(double real) {
         if (real == 0.0) throw new ArithmeticException("Division by zero.");
         return new Complex(this.Re / real, this.Im / real);
+    }
+    public Complex copy() {
+        return new Complex(Re, Im);
     }
 }

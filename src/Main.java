@@ -7,13 +7,20 @@
 
 public class Main {
     public static void main(String[] args) {
-        Matrix M = new Matrix(2, 3);
-        M.set(new Complex(3, 4), 0, 0);
-        M.set(new Complex(1, 2), 0, 1);
-        M.set(new Complex(4, 2), 0, 2);
-        M.show();
-        System.out.println();
-        Matrix M_tr = M.transposed();
-        M_tr.show();
+        Matrix m1 = new Matrix(3, 3);
+        Matrix m2 = new Matrix(3, 3);
+        System.out.print("m1:\n");
+        m1.fillRand(-2, 32, true);
+        m2.fillRand(-7, 14, true);
+        m1.show();
+        System.out.print("\nm2:\n");
+        m2.show();
+        System.out.print("\n\nsum:\n");
+        m1.plusw(m2).show();
+        System.out.print("det(m1): " + m1.detGauss().toString() + "\ndet(m2): " + m2.detGauss().toString() + "\n");
+        System.out.print("\nm1 Inversed:\n");
+        m1.inversed().show();
+        System.out.print("\nm1 transposed:\n");
+        m1.transposed().show();
     }
 }
