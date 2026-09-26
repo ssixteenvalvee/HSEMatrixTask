@@ -59,40 +59,37 @@ public class Matrix {
 
     private final Random random = new Random();
 
-    public Complex parser(String cmp) { // XXX +- YYYi
-        if (cmp.length() > 64) {
-            throw new IllegalArgumentException("Too long input (<= 64).");
-        }
-        String re_str = "";
-        String im_str = "";
-        boolean re_sc = true;
-        boolean ism = false;
-        int l = 0;
-        while (l < cmp.length()) {
-            if (cmp.charAt(l) == 32) {l++; continue;} // ascii 32 is 'space'.
-            if (Character.isDigit(cmp.charAt(l))) {
-                if (re_sc) {
-                    re_str += cmp.charAt(l);
-                } else {
-                    im_str += cmp.charAt(l);
-                }
-            } else if (cmp.charAt(l) == '+' || cmp.charAt(l) == '-' || cmp.charAt(l) == 'i') {
-                
-                re_sc = false;
-                ism = (cmp.charAt(l) == '-') ? true : false;
-            } else {
-                throw new IllegalArgumentException("Given chars except 'i', '+' and '-'");
+    public static Complex parser(String s) {
+        if (s == null) throw new IllegalArgumentException("Input is null.");
+        if (s.length() > 64) throw new IllegalArgumentException("Too long input: (<= 64).");
+
+        s = s.trim().replace(" ", "");
+        if (s.isEmpty()) throw new IllegalArgumentException("Input has no data to parse.");
+
+        boolean hasI = s.endsWith("i");
+        String body = (hasI) ? s.substring(0, s.length() - 1) : s;
+
+        if (hasI && (body.isEmpty() || body.equals("+"))) {return new Complex(0, 1);}
+        if (hasI && body.equals("-")) {return new Complex(0, -1);}
+
+        int split = -1;
+        for (int i = 1; i < body.length(); i++) {
+            char c = body.charAt(i);
+            if ((c == '+' || c == '-')) {
+                split = i;
             }
-            l++;
         }
-        Complex num;
-        if (re_str.isEmpty() || im_str.isEmpty()) {
-            throw new IllegalArgumentException("Re/Im is not parsed.");
-        } else {
-            num = new Complex(Double.parseDouble(re_str), Double.parseDouble(im_str));
+
+        if (!hasI) {
+            return new Complex(Double.parseDouble(body), 0);
         }
-        return (ism) ? num.conjugate() : num;
-    }
+        if (split == -1) {
+            return new Complex(0, Double.parseDouble(body));
+        }
+        double re = Double.parseDouble(body.substring(0, split));
+        double im = Double.parseDouble(body.substring(split));
+        return new Complex(re, im);
+}
 
     public void fillRand(double min, double max, boolean iflong) {
         for (int row = 0; row < Rows; row++) {
