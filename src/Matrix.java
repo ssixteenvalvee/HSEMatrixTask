@@ -1,8 +1,8 @@
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
-// perhaps make it mutable.
-// add set method for Complex[][] A?
+// matrix is mutable -> set(val, i, j);
 
 public class Matrix {
     private final int Rows;
@@ -45,12 +45,18 @@ public class Matrix {
     public void set(Complex val, int r, int c) {A[r][c] = val;}
     // methods
     public void fill() {
+        double re;
+        double im;
         Scanner scanner = new Scanner(System.in);
         for (int row = 0; row < Rows; row++) {
             for (int col = 0; col < Cols; col++) {
                 System.out.printf("Enter Re and Im at (%d, %d): ", row, col);
-                double re = scanner.nextDouble();
-                double im = scanner.nextDouble();
+                try {
+                    re = scanner.nextDouble();
+                    im = scanner.nextDouble();
+                } catch (InputMismatchException e) {
+                    throw new InputMismatchException("Error: You should enter double or integers!");
+                }
                 Complex c = new Complex(re, im);
                 A[row][col] = c;
             }
