@@ -1,6 +1,5 @@
 import java.util.Random;
 import java.util.Scanner;
-import java.util.random.*;
 
 // perhaps make it mutable.
 // add set method for Complex[][] A?
@@ -10,11 +9,6 @@ public class Matrix {
     private final int Cols;
     private final Complex[][] A;
 
-    Matrix() {
-        Rows = 0;
-        Cols = 0;
-        A = new Complex[Rows][Cols];
-    }
     Matrix(int r, int c) {
         Rows = r;
         Cols = c;
@@ -54,7 +48,7 @@ public class Matrix {
         Scanner scanner = new Scanner(System.in);
         for (int row = 0; row < Rows; row++) {
             for (int col = 0; col < Cols; col++) {
-                System.out.print("Enter Re and Im: ");
+                System.out.printf("Enter Re and Im at (%d, %d): ", row, col);
                 double re = scanner.nextDouble();
                 double im = scanner.nextDouble();
                 Complex c = new Complex(re, im);
@@ -64,6 +58,41 @@ public class Matrix {
     }
 
     private final Random random = new Random();
+
+    public Complex parser(String cmp) { // XXX +- YYYi
+        if (cmp.length() > 64) {
+            throw new IllegalArgumentException("Too long input (<= 64).");
+        }
+        String re_str = "";
+        String im_str = "";
+        boolean re_sc = true;
+        boolean ism = false;
+        int l = 0;
+        while (l < cmp.length()) {
+            if (cmp.charAt(l) == 32) {l++; continue;} // ascii 32 is 'space'.
+            if (Character.isDigit(cmp.charAt(l))) {
+                if (re_sc) {
+                    re_str += cmp.charAt(l);
+                } else {
+                    im_str += cmp.charAt(l);
+                }
+            } else if (cmp.charAt(l) == '+' || cmp.charAt(l) == '-' || cmp.charAt(l) == 'i') {
+                
+                re_sc = false;
+                ism = (cmp.charAt(l) == '-') ? true : false;
+            } else {
+                throw new IllegalArgumentException("Given chars except 'i', '+' and '-'");
+            }
+            l++;
+        }
+        Complex num;
+        if (re_str.isEmpty() || im_str.isEmpty()) {
+            throw new IllegalArgumentException("Re/Im is not parsed.");
+        } else {
+            num = new Complex(Double.parseDouble(re_str), Double.parseDouble(im_str));
+        }
+        return (ism) ? num.conjugate() : num;
+    }
 
     public void fillRand(double min, double max, boolean iflong) {
         for (int row = 0; row < Rows; row++) {
@@ -86,7 +115,7 @@ public class Matrix {
         }
     }
 
-    public Complex detGauss() {
+    public Complex detGauss() { // Gauss method
         Complex det = new Complex(1.0, 0.0);
         int n = A.length;
         Complex[][] a = new Complex[n][n];
@@ -158,9 +187,7 @@ public class Matrix {
     public Matrix prodw(Matrix B) {
         if (this.Cols != B.Rows) {
             throw new IllegalArgumentException( //
-                    "Cannot multiply: A is " + this.Rows + "x" + this.Cols +
-                    ", B is " + B.Rows + "x" + B.Cols +
-                    ". Need A.Cols == B.Rows.");
+                    "Cannot multiply: The number of A_Columns must be eqaul the number of B_Rows.");
         }
         Matrix C = new Matrix(this.Rows, B.getCols());
         //Complex[][] a = this.A; // massive - matrix
@@ -198,7 +225,7 @@ public class Matrix {
         return A_transposed;
     }
 
-    public Matrix inversed() {
+    public Matrix inversed() { // Gauss method
         if (this.Rows != this.Cols) {
             throw new IllegalArgumentException("Only for square matrix.");
         }
