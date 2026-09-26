@@ -6,7 +6,14 @@
  */
 
 public class Main {
-    public static void main(String[] args) {
+
+    public void USER_INTERFACE() {
         
+    }
+    public static void main(String[] args) {
+        System.out.println("> Hello!");
+        Matrix m1 = new Matrix(2, 2);
+        m1.fillString();
+        m1.show();
     }
 }

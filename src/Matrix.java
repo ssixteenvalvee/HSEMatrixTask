@@ -87,9 +87,25 @@ public class Matrix {
             return new Complex(0, Double.parseDouble(body));
         }
         double re = Double.parseDouble(body.substring(0, split));
+        if (body.substring(split).equals("+") || body.substring(split).equals("-")) {
+            return new Complex(re, 1);
+        }
         double im = Double.parseDouble(body.substring(split));
         return new Complex(re, im);
 }
+
+    public void fillString() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Complex number is represented as Real + Imaginary * i.");
+        System.out.println("Input should be: 'X + Yi', where X is Re and Y is Im. Without ''.");
+        for (int i = 0; i < Rows; i++) {
+            for (int j = 0; j < Cols; j++) {
+                System.out.printf("[For (%d, %d)] Enter the complex number in string format: ", i+1, j+1);
+                Complex num = parser(sc.nextLine());
+                this.set(num, i, j);
+            }
+        }
+    }
 
     public void fillRand(double min, double max, boolean iflong) {
         for (int row = 0; row < Rows; row++) {
@@ -105,7 +121,7 @@ public class Matrix {
         for (int i = 0; i < this.Rows; i++) {
             for (int j = 0; j < this.Cols; j++) {
                 // System.out.print(this.A[i][j].toString() + "\t");
-                String body = String.format("[%s]\t", A[i][j].toString());
+                String body = String.format("[%s]", A[i][j].toString());
                 System.out.printf("%-20s", body);
             }
             System.out.println();
