@@ -44,10 +44,9 @@ public class Matrix {
     //set
     public void set(Complex val, int r, int c) {A[r][c] = val;}
     // methods
-    public void fill() {
+    public void fill(Scanner scanner) {
         double re;
         double im;
-        Scanner scanner = new Scanner(System.in);
         for (int row = 0; row < Rows; row++) {
             for (int col = 0; col < Cols; col++) {
                 System.out.printf("Enter Re and Im at (%d, %d): ", row, col);
@@ -100,8 +99,7 @@ public class Matrix {
         return new Complex(re, im);
 }
 
-    public void fillString() {
-        Scanner sc = new Scanner(System.in);
+    public void fillString(Scanner sc) {
         System.out.println("Complex number is represented as Real + Imaginary * i.");
         System.out.println("Input should be: 'X + Yi', where X is Re and Y is Im. Without ''.");
         for (int i = 0; i < Rows; i++) {
