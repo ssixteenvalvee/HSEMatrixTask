@@ -1,4 +1,3 @@
-import java.lang.Math.*;
 
 public class Complex {
     private final double Re;

@@ -1,6 +1,5 @@
-import java.util.InputMismatchException;
-import java.util.Random;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 // matrix is mutable -> set(val, i, j);
 
@@ -8,6 +7,7 @@ public class Matrix {
     private final int Rows;
     private final int Cols;
     private final Complex[][] A;
+
 
     Matrix(int r, int c) {
         Rows = r;
@@ -29,6 +29,7 @@ public class Matrix {
             }
         }
     }
+
 
     // get
     public int getRows() {return Rows;}
@@ -173,7 +174,7 @@ public class Matrix {
 
     public Matrix plusw(Matrix B) {
         if (this.Rows != B.Rows || this.Cols != B.Cols) {
-            throw new IllegalArgumentException("Only with single-dimension matrix.");
+            throw new IllegalArgumentException("Matrices should with similar dimensions.");
         }
         Matrix C = new Matrix(this.Rows, this.Cols);
         for (int i = 0; i < this.Rows; i++) {
@@ -188,7 +189,7 @@ public class Matrix {
 
     public Matrix minusw(Matrix B) {
         if (this.Rows != B.Rows || this.Cols != B.Cols) {
-            throw new IllegalArgumentException("Only for matrixs with same dimensions.");
+            throw new IllegalArgumentException("Matrices should with similar dimensions.");
         }
         Matrix C = new Matrix(this.Rows, this.Cols);
         for (int i = 0; i < this.Rows; i++) {
@@ -328,7 +329,35 @@ public class Matrix {
     }
 
     public Matrix divw(Matrix B) {
-        // very, very costy!
+        // very, very expensive!
         return this.prodw(B.inversed());
+    }
+
+    public void save(Writer w) throws IOException { // Printwriter
+        w.write(Rows + " " + Cols + "\n");
+        for (int i = 0; i < Rows; i++) {
+            for (int j = 0; j < Cols; j++) {
+                w.write(A[i][j].getRe() + " " + A[i][j].getIm());
+                if (j < Cols - 1) w.write(" ");
+            }
+            w.write("\n");
+        }
+    }
+
+    public static Matrix load(BufferedReader br) throws IOException {
+        // caught from method in MAIN (!!!)
+        StringTokenizer st = new StringTokenizer(br.readLine()); // skips spaces tabs and etc.
+        int rows = Integer.parseInt(st.nextToken());
+        int cols = Integer.parseInt(st.nextToken());
+        Matrix m = new Matrix(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < cols; j++) {
+                double re = Double.parseDouble(st.nextToken());
+                double im = Double.parseDouble(st.nextToken());
+                m.set(new Complex(re, im), i, j);
+            }
+        }
+        return m;
     }
 }
