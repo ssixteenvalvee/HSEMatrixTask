@@ -52,6 +52,7 @@ public class Main {
         for (Matrix mx : matrices) {
             System.out.printf("%d).\n", ils);
             mx.show();
+            System.out.printf("Dim = (%d, %d)\n", mx.getRows(), mx.getCols());
             System.out.println();
             ils++;
         }
@@ -63,6 +64,22 @@ public class Main {
         for (Matrix m : Ms) {
             try {
                 result = result.plusw(m);
+                i++;
+            } catch (IllegalArgumentException e) {
+                System.err.println(e);
+                System.out.printf("%d matrices have been put together.", i-1);
+                return result;
+            }
+        }
+        return result;
+    }
+
+    public static Matrix difMatrix(ArrayList<Matrix> Ms) {
+        Matrix result = new Matrix(Ms.get(0).getRows(), Ms.get(0).getCols());
+        int i = 1;
+        for (Matrix m : Ms) {
+            try {
+                result = result.minusw(m);
                 i++;
             } catch (IllegalArgumentException e) {
                 System.err.println(e);
@@ -163,7 +180,6 @@ public class Main {
                 System.out.printf("Something went wrong while saving: %s\n", e);
             }
         }
-        return;
     }
 
     public static boolean askUser(Scanner sc, String text, String ... cond) {
@@ -180,9 +196,14 @@ public class Main {
 
     public static final String path = "data.txt";                   // !!!
 
+
+// FIX DIF IT WORKS WRONG
+// !!!
+// !!!
+
     public static void main(String[] args) {
         String Instruction = "TIP:\tTo perform some arithmetic operations with matrices\n\tyou should add them with 'mkm' command firstly.\n";
-        String[] commands = {"help - help", "stop - stop", "mkm - Make Matrix.", "mls - Matrix listing.", "sum - summarise matrices"};
+        String[] commands = {"help - help", "stop - stop", "mkm - Make Matrix.", "mls - Matrix listing.", "sum - summarise matrices", "pd - product of two matrices", "dif - matricies difference."};
         ArrayList<Matrix> matrices;
         System.out.println("Hello!");
         Scanner sc = new Scanner(System.in);
@@ -227,13 +248,13 @@ public class Main {
                     ArrayList<Matrix> ms = new ArrayList<>();
                     listing(matrices);
                     System.out.print("Please, enter indecies of matricies to continue.\nYou have to chose id and press Enter.\nEnter blank when you're done:\n");
-                    while (true) { //
+                    while (true) {
                         String input = sc.nextLine().trim();
                         if (input.isEmpty()) break;
                         try {
                             int idx = Integer.parseInt(input) - 1;
                             if (idx < 0 || idx >= matrices.size()) {
-                                System.out.println("No matrix with id" + (idx + 1) + ". Try again.");
+                                System.out.println("No matrix with such id. Try again.");
                                 continue;
                             }
                             ms.add(matrices.get(idx));
@@ -241,7 +262,6 @@ public class Main {
                             System.out.println("EXCEPTION: Something wrong with the input: " + input);
                         }
                     }
-                    //
                     if (ms.isEmpty()) {
                         System.out.println("No matrices selected.");
                         break;
@@ -260,6 +280,92 @@ public class Main {
                         matrices.add(result);
                     }
                     //
+                    break;
+                case "dif":
+                    if (matrices.size() < 2) { // edge cases and info
+                        System.out.println("You should add at least two matrices first.");
+                        break;
+                    }
+                    clear();
+                    Matrix result_dif;
+                    ArrayList<Matrix> ms_dif = new ArrayList<>();
+                    listing(matrices);
+                    System.out.print("Please, enter indecies of matricies to continue.\nYou have to chose id and press Enter.\nEnter blank when you're done:\n");
+                    while (true) {
+                        String input = sc.nextLine().trim();
+                        if (input.isEmpty()) break;
+                        try {
+                            int idx = Integer.parseInt(input) - 1;
+                            if (idx < 0 || idx >= matrices.size()) {
+                                System.out.println("No matrix with such id. Try again.");
+                                continue;
+                            }
+                            ms_dif.add(matrices.get(idx));
+                        } catch (NumberFormatException e) {
+                            System.out.println("EXCEPTION: Something wrong with the input: " + input);
+                        }
+                    }
+                    if (ms_dif.isEmpty()) {
+                        System.out.println("No matrices selected.");
+                        break;
+                    }
+                    try {
+                        result = difMatrix(ms_dif);
+                    } catch (IndexOutOfBoundsException e) {
+                        System.err.println("Exception: IndexOutOfBound. You specified wrong matrix index.");
+                        break;
+                    }
+                    System.out.println("The result is:");
+                    result.show();
+                    // do like this for future everywhere
+                    boolean choice_dif = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
+                    if (choice_dif) {
+                        matrices.add(result);
+                    }
+                    break;
+                case "pd":
+                    if (matrices.size() < 2) { // edge cases and info
+                        System.out.println("You should add at least two matrices first.");
+                        break;
+                    }
+                    clear();
+                    Matrix result_pd;
+                    listing(matrices);
+                    System.out.print("Pay attention: You have to choose two matrices A & B, where Cols of A equals Rows of B.\n");
+                    System.out.print("Please, enter TWO indecies to continue.\nYou have to chose id and press Enter:\n");
+                    int[] chosen = new int[2];
+                    int got = 0;
+                    while (got < 2) {
+                        String input = sc.nextLine().trim();
+                        if (input.isEmpty()) break;
+                        try {
+                            int idx = Integer.parseInt(input) - 1;
+                            if (idx < 0 || idx >= matrices.size()) {
+                                System.out.println("No matrix with such id. Try again.");
+                                continue;
+                            }
+                            chosen[got] = idx;
+                            got++;
+                        } catch (NumberFormatException e) {
+                            System.out.println("EXCEPTION: Not a number input.");
+                        }
+                    }
+                    if (got < 2) {
+                        System.out.println("Need exactly two matrices. Aborting.");
+                        break;
+                    }
+                    try {
+                        result_pd = matrices.get(chosen[0]).prodw(matrices.get(chosen[1]));
+                    } catch (IndexOutOfBoundsException e) {
+                        System.err.println("EXCEPTION: You specified wrong matrix index.");
+                        break;
+                    }
+                    System.out.println("The result is:");
+                    result_pd.show();
+                    boolean choicepd = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
+                    if (choicepd) {
+                        matrices.add(result_pd);
+                    }
                     break;
                 default:
                     System.out.println("\n" + Instruction);
