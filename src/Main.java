@@ -26,12 +26,10 @@ public class Main {
     }
 
     public static void save(ArrayList<Matrix> Ms, String path) throws IOException {
-        PrintWriter pw = new PrintWriter(new FileWriter(path));
-        pw.println(Ms.size());      // for 'for' cycle in loading  *
-        for (Matrix m : Ms)  {
-            m.save(pw);
+        try (PrintWriter pw = new PrintWriter(new FileWriter(path))) {
+            pw.println(Ms.size());
+            for (Matrix m : Ms) m.save(pw);
         }
-        pw.close();
     }
 
     public static ArrayList<Matrix> load(String path) throws IOException {
@@ -208,15 +206,12 @@ public class Main {
     public static final String path = "data.txt";                   // !!!
 
 
-// FIX DIF IT WORKS WRONG
-// !!!
-// !!!
-
     public static void main(String[] args) {
         String Instruction = "TIP:\tTo perform some arithmetic operations with matrices\n\tyou should add them with 'mkm' command firstly.\n";
         String[] commands = {"help - help.", "stop - stop.", "mkm - Make Matrix.", "mls - Matrix listing.", "sum - summarise matrices.",
                 "pd - product of two matrices.", "dif - matrices difference.", "t - transpose.", "det - find determinant.",
-                "sd - change option: Show determinant in listing or not.", "div - divide two matrices."};
+                "sd - change option: Show determinant in listing or not.", "div - divide two matrices.",
+                "inv - inversed matrix."};
         ArrayList<Matrix> matrices;
         System.out.println("Hello!");
         Scanner sc = new Scanner(System.in);
@@ -377,9 +372,6 @@ public class Main {
                     } catch (IllegalArgumentException e) {
                         System.err.println(e.getMessage() + " Aborting.");
                         break;
-                    } catch (ArithmeticException e) {
-                        System.err.println(e.getMessage());
-                        break;
                     }
                     System.out.println("The result is:");
                     result_pd.show();
@@ -511,6 +503,49 @@ public class Main {
                     if (choice_div) {
                         matrices.add(result_div);
                     }
+                    break;
+                case "inv":
+                    if (matrices.isEmpty()) { // edge cases and info
+                        System.out.println("You should add at least one matrix first.");
+                        break;
+                    }
+                    listing(matrices, showdet);
+                    System.out.println("Pay attention: Matrix can be inversed only if it is SQUARE.");
+                    int id_inv = -1;
+                    while (id_inv < 0 || id_inv >= matrices.size()) {
+                        System.out.print(">");
+                        String input_t = sc.nextLine().trim();
+                        if (input_t.isEmpty()) break;
+                        try {
+                            id_inv = Integer.parseInt(input_t) - 1;
+                            if (id_inv < 0 || id_inv >= matrices.size()) {
+                                System.out.println("No matrix with such id. Try again.");
+                                continue;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("EXCEPTION: Not a number input.");
+                        }
+                    }
+                    Matrix result_inv;
+                    try {
+                        result_inv = matrices.get(id_inv).inversed();
+                    } catch (IllegalArgumentException e) {
+                        System.err.println(e + " You should pick square matrix. Aborting.");
+                        break;
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Operation Aborted.");
+                        break;
+                    } catch (ArithmeticException e) {
+                        System.err.println(e + " Operation can not be finished.");
+                        break;
+                    }
+                    System.out.println("The result is: ");
+                    result_inv.show();
+                    boolean choice_inv = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
+                    if (choice_inv) {
+                        matrices.add(result_inv);
+                    }
+                    System.out.println("Successfully");
                     break;
                 default:
                     System.out.println("\n" + Instruction);
