@@ -77,7 +77,7 @@ public class Main {
                 i++;
             } catch (IllegalArgumentException e) {
                 System.err.println(e.getMessage());
-                System.out.printf("%d matrices have been put together.", i-1);
+                System.out.printf("%d matrices have been put together.", i);
                 return result;
             }
         }
@@ -410,7 +410,13 @@ public class Main {
                             System.out.println("EXCEPTION: Not a number input.");
                         }
                     }
-                    Matrix result_t = matrices.get(id_t).transposed();
+                    Matrix result_t;
+                    try {
+                        result_t = matrices.get(id_t).transposed();
+                    } catch (IndexOutOfBoundsException e) {
+                        System.err.println("Operation aborted.");
+                        break;
+                    }
                     System.out.print("The result is: \n");
                     result_t.show();
                     boolean choice_t = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
@@ -445,7 +451,10 @@ public class Main {
                     try {
                         result_det = matrices.get(id_det).detGauss();
                     } catch (IllegalArgumentException e) {
-                        System.out.println(e + "You should pick square matrix. Aborting.");
+                        System.out.println(e + " You should pick square matrix. Aborting.");
+                        break;
+                    } catch (IndexOutOfBoundsException e) {
+                        System.err.println("Operation Aborted.");
                         break;
                     }
                     System.out.println("The determinant is: " + result_det.toString());
