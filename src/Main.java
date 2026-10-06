@@ -16,9 +16,13 @@ import java.util.Scanner;
 
 public class Main {
     public static void clear() {
-    System.out.print("\u001B[2J\u001B[H");
-    System.out.println("== Complex Matrix Calculator v0.1 ==");
-    System.out.flush();
+        if (System.console() != null) {
+            System.out.print("\u001B[2J\u001B[H");
+            System.out.flush();
+        } else {
+            for (int i = 0; i < 50; i++) System.out.println();
+        }
+        System.out.println("== Complex Matrix Calculator v0.1 ==");
     }
 
     public static void save(ArrayList<Matrix> Ms, String path) throws IOException {
@@ -42,7 +46,7 @@ public class Main {
         return matrices;
     }
 
-    public static void listing(ArrayList<Matrix> matrices) {
+    public static void listing(ArrayList<Matrix> matrices, boolean show_det) {
         if (matrices.isEmpty()) {
             System.out.println("No matrices found.");
             return;
@@ -52,21 +56,27 @@ public class Main {
         for (Matrix mx : matrices) {
             System.out.printf("%d).\n", ils);
             mx.show();
-            System.out.printf("Dim = (%d, %d)\n", mx.getRows(), mx.getCols());
+            System.out.printf("\tDim = (%d, %d),  Det: ", mx.getRows(), mx.getCols());
+            try {
+                if (show_det) System.out.print(mx.detGauss().toString() + "\n");
+            } catch (IllegalArgumentException e) {
+                System.out.print("NA\n");
+            }
             System.out.println();
             ils++;
         }
     }
 
     public static Matrix sumMatrix(ArrayList<Matrix> Ms) {
-        Matrix result = new Matrix(Ms.get(0).getRows(), Ms.get(0).getCols());
+        Matrix result = Ms.getFirst();
         int i = 1;
-        for (Matrix m : Ms) {
+        for (int c = 1; c < Ms.size(); c++) {
+            Matrix m = Ms.get(c);
             try {
                 result = result.plusw(m);
                 i++;
             } catch (IllegalArgumentException e) {
-                System.err.println(e);
+                System.err.println(e.getMessage());
                 System.out.printf("%d matrices have been put together.", i-1);
                 return result;
             }
@@ -75,15 +85,16 @@ public class Main {
     }
 
     public static Matrix difMatrix(ArrayList<Matrix> Ms) {
-        Matrix result = new Matrix(Ms.get(0).getRows(), Ms.get(0).getCols());
-        int i = 1;
-        for (Matrix m : Ms) {
+        Matrix result = Ms.getFirst();
+        int i = 0;
+        for (int c = 1; c < Ms.size(); c++) {
+            Matrix m = Ms.get(c);
             try {
                 result = result.minusw(m);
                 i++;
             } catch (IllegalArgumentException e) {
-                System.err.println(e);
-                System.out.printf("%d matrices have been put together.", i-1);
+                System.err.println(e.getMessage());
+                System.out.printf("%d matrices have been differenced.", i);
                 return result;
             }
         }
@@ -112,7 +123,7 @@ public class Main {
                 try {
                     m.fillString(sc);
                 } catch(IllegalArgumentException e) {
-                    System.err.printf("Error: %s", e);
+                    System.err.println("EXCEPTION: " + e.getMessage());
                     return;
                 }
                 matrices.add(m);
@@ -127,7 +138,7 @@ public class Main {
                     r = sc.nextInt();
                     sc.nextLine();
                 } catch (InputMismatchException e) {
-                    System.out.print("\nExceptionCaught: You should type integers.");
+                    System.out.print("\nEXCEPTION: You should type integers.");
                     return;
                 }
                 m = new Matrix(row, col);
@@ -140,7 +151,7 @@ public class Main {
                 try {
                     m.fill(sc);
                 } catch (InputMismatchException e) {
-                    System.err.printf("ExceptionCaught: %s", e);
+                    System.err.println("EXCEPTION: " + e.getMessage());
                     sc.nextLine();
                     return;
                 }
@@ -161,9 +172,9 @@ public class Main {
             try {
                 Ms = load(gpath);
             } catch (IOException e) {
-                System.out.printf("Something went wrong while loading: %s\n", e);
+                System.err.printf("IOException: Something went wrong while loading: %s\n", e.getMessage());
             } catch (NullPointerException e) {
-                System.out.println("There is no data.");
+                System.out.println("EXCEPTION: There is no data.");
             }
         }
         return Ms;
@@ -177,7 +188,7 @@ public class Main {
             try {
                 save(Ms, gpath);
             } catch (IOException e) {
-                System.out.printf("Something went wrong while saving: %s\n", e);
+                System.err.printf("IOException: Something went wrong while saving: %s\n", e.getMessage());
             }
         }
     }
@@ -203,10 +214,13 @@ public class Main {
 
     public static void main(String[] args) {
         String Instruction = "TIP:\tTo perform some arithmetic operations with matrices\n\tyou should add them with 'mkm' command firstly.\n";
-        String[] commands = {"help - help", "stop - stop", "mkm - Make Matrix.", "mls - Matrix listing.", "sum - summarise matrices", "pd - product of two matrices", "dif - matricies difference."};
+        String[] commands = {"help - help.", "stop - stop.", "mkm - Make Matrix.", "mls - Matrix listing.", "sum - summarise matrices.",
+                "pd - product of two matrices.", "dif - matrices difference.", "t - transpose.", "det - find determinant.",
+                "sd - change option: Show determinant in listing or not.", "div - divide two matrices."};
         ArrayList<Matrix> matrices;
         System.out.println("Hello!");
         Scanner sc = new Scanner(System.in);
+        boolean showdet = true;
 
         matrices = loadListing(path, sc);
 
@@ -218,11 +232,12 @@ public class Main {
             switch(line) {
                 case "stop":
                     askSave(matrices, sc, path);
-                    System.out.print("OK. Bye then.\n"); 
+                    System.out.print("OK. Bye then.\n");
                     System.exit(0);
                 case "help":
                     clear();
                     System.out.println(Instruction);
+                    System.out.printf("Show_determinant is: %b\n", showdet);
                     for (String cmd : commands) {
                         System.out.printf("%s\n", cmd);
                     }
@@ -236,7 +251,7 @@ public class Main {
                     }
                     break;
                 case "mls":
-                    listing(matrices);
+                    listing(matrices, showdet);
                     break;
                 case "sum":
                     if (matrices.size() < 2) { // edge cases and info
@@ -246,9 +261,10 @@ public class Main {
                     clear();
                     Matrix result;
                     ArrayList<Matrix> ms = new ArrayList<>();
-                    listing(matrices);
+                    listing(matrices, showdet);
                     System.out.print("Please, enter indecies of matricies to continue.\nYou have to chose id and press Enter.\nEnter blank when you're done:\n");
                     while (true) {
+                        System.out.print(">");
                         String input = sc.nextLine().trim();
                         if (input.isEmpty()) break;
                         try {
@@ -269,7 +285,7 @@ public class Main {
                     try {
                         result = sumMatrix(ms);
                     } catch (IndexOutOfBoundsException e) {
-                        System.err.println("Exception: IndexOutOfBound. You specified wrong matrix index.");
+                        System.out.println("EXCEPTION: IndexOutOfBound. You specified wrong matrix index.");
                         break;
                     }
                     System.out.println("The result is:");
@@ -289,9 +305,10 @@ public class Main {
                     clear();
                     Matrix result_dif;
                     ArrayList<Matrix> ms_dif = new ArrayList<>();
-                    listing(matrices);
+                    listing(matrices, showdet);
                     System.out.print("Please, enter indecies of matricies to continue.\nYou have to chose id and press Enter.\nEnter blank when you're done:\n");
                     while (true) {
+                        System.out.print(">");
                         String input = sc.nextLine().trim();
                         if (input.isEmpty()) break;
                         try {
@@ -310,17 +327,17 @@ public class Main {
                         break;
                     }
                     try {
-                        result = difMatrix(ms_dif);
+                        result_dif = difMatrix(ms_dif);
                     } catch (IndexOutOfBoundsException e) {
-                        System.err.println("Exception: IndexOutOfBound. You specified wrong matrix index.");
+                        System.err.println("EXCEPTION: IndexOutOfBound. You specified wrong matrix index.");
                         break;
                     }
                     System.out.println("The result is:");
-                    result.show();
+                    result_dif.show();
                     // do like this for future everywhere
                     boolean choice_dif = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
                     if (choice_dif) {
-                        matrices.add(result);
+                        matrices.add(result_dif);
                     }
                     break;
                 case "pd":
@@ -330,12 +347,13 @@ public class Main {
                     }
                     clear();
                     Matrix result_pd;
-                    listing(matrices);
+                    listing(matrices, showdet);
                     System.out.print("Pay attention: You have to choose two matrices A & B, where Cols of A equals Rows of B.\n");
                     System.out.print("Please, enter TWO indecies to continue.\nYou have to chose id and press Enter:\n");
                     int[] chosen = new int[2];
                     int got = 0;
                     while (got < 2) {
+                        System.out.print(">");
                         String input = sc.nextLine().trim();
                         if (input.isEmpty()) break;
                         try {
@@ -356,8 +374,11 @@ public class Main {
                     }
                     try {
                         result_pd = matrices.get(chosen[0]).prodw(matrices.get(chosen[1]));
-                    } catch (IndexOutOfBoundsException e) {
-                        System.err.println("EXCEPTION: You specified wrong matrix index.");
+                    } catch (IllegalArgumentException e) {
+                        System.err.println(e.getMessage() + " Aborting.");
+                        break;
+                    } catch (ArithmeticException e) {
+                        System.err.println(e.getMessage());
                         break;
                     }
                     System.out.println("The result is:");
@@ -365,6 +386,121 @@ public class Main {
                     boolean choicepd = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
                     if (choicepd) {
                         matrices.add(result_pd);
+                    }
+                    break;
+                case "t":
+                    if (matrices.isEmpty()) { // edge cases and info
+                        System.out.println("You should add at least one matrix first.");
+                        break;
+                    }
+                    listing(matrices, showdet);
+                    System.out.println("You should pick one matrix you want to transpose: ");
+                    int id_t = -1;
+                    while (id_t < 0 || id_t >= matrices.size()) {
+                        System.out.print(">");
+                        String input_t = sc.nextLine().trim();
+                        if (input_t.isEmpty()) break;
+                        try {
+                            id_t = Integer.parseInt(input_t) - 1;
+                            if (id_t < 0 || id_t >= matrices.size()) {
+                                System.out.println("No matrix with such id. Try again.");
+                                continue;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("EXCEPTION: Not a number input.");
+                        }
+                    }
+                    Matrix result_t = matrices.get(id_t).transposed();
+                    System.out.print("The result is: \n");
+                    result_t.show();
+                    boolean choice_t = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
+                    if (choice_t) {
+                        matrices.add(result_t);
+                    }
+                    System.out.println("Successfully");
+                    break;
+                case "det":
+                    if (matrices.isEmpty()) { // edge cases and info
+                        System.out.println("You should add at least one matrix first.");
+                        break;
+                    }
+                    listing(matrices, false);
+                    System.out.println("Pay attention: Determinant can be found only for square matrix.");
+                    int id_det = -1;
+                    while (id_det < 0 || id_det >= matrices.size()) {
+                        System.out.print(">");
+                        String input_t = sc.nextLine().trim();
+                        if (input_t.isEmpty()) break;
+                        try {
+                            id_det = Integer.parseInt(input_t) - 1;
+                            if (id_det < 0 || id_det >= matrices.size()) {
+                                System.out.println("No matrix with such id. Try again.");
+                                continue;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("EXCEPTION: Not a number input.");
+                        }
+                    }
+                    Complex result_det;
+                    try {
+                        result_det = matrices.get(id_det).detGauss();
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e + "You should pick square matrix. Aborting.");
+                        break;
+                    }
+                    System.out.println("The determinant is: " + result_det.toString());
+                    System.out.println("Successfully");
+                    break;
+                case "sd":
+                    showdet = !showdet;
+                    break;
+                case "div":
+                    if (matrices.size() < 2) {
+                        System.out.println("You should add at least two matrices first.");
+                        break;
+                    }
+                    clear();
+                    Matrix result_div;
+                    listing(matrices, showdet);
+                    System.out.println("Pay attention: A / B means A * B^(-1).");
+                    System.out.println("B must be SQUARE and NON-SINGULAR (det(B) != 0).");
+                    System.out.println("Enter TWO indices. After every index press Enter: ");
+                    int[] chosen_div = new int[2];
+                    int got_div = 0;
+                    while (got_div < 2) {
+                        System.out.print(">");
+                        String input = sc.nextLine().trim();
+                        if (input.isEmpty()) break;
+                        try {
+                            int idx = Integer.parseInt(input) - 1;
+                            if (idx < 0 || idx >= matrices.size()) {
+                                System.out.println("No matrix with such id. Try again.");
+                                continue;
+                            }
+                            chosen_div[got_div] = idx;
+                            got_div++;
+                        } catch (NumberFormatException e) {
+                            System.out.println("EXCEPTION: Not a number input.");
+                        }
+                    }
+                    if (got_div < 2) {
+                        System.out.println("Need exactly two matrices. Aborting.");
+                        break;
+                    }
+                    try {
+                        result_div = matrices.get(chosen_div[0]).divw(matrices.get(chosen_div[1]));
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("EXCEPTION: Cannot divide -- " + e.getMessage());
+                        break;
+                    } catch (ArithmeticException e) {
+                        System.err.println("EXCEPTION: " + e.getMessage());
+                        break;
+                    }
+                    System.out.println("The result is:");
+                    result_div.show();
+                    boolean choice_div = askUser(sc, "Append the result to the listing? [Y/N]: ", "y", "ye", "yes");
+                    if (choice_div) {
+                        matrices.add(result_div);
                     }
                     break;
                 default:

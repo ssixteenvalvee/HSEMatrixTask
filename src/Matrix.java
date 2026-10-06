@@ -43,7 +43,7 @@ public class Matrix {
     }
     public Complex get(int r, int c) {return A[r][c];}
     //set
-    public void set(Complex val, int r, int c) {A[r][c] = val;}
+    private void set(Complex val, int r, int c) {A[r][c] = val;}
     // methods
     public void fill(Scanner scanner) {
         double re;
