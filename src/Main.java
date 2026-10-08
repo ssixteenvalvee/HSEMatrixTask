@@ -110,6 +110,7 @@ public class Main {
             sc.nextLine();
         } catch (InputMismatchException e) {
             System.out.print("\nExceptionCaught: Rows and Cols should be Integers.");
+            sc.nextLine();
             return;
         }
         String choice;
@@ -122,6 +123,7 @@ public class Main {
                     m.fillString(sc);
                 } catch(IllegalArgumentException e) {
                     System.err.println("EXCEPTION: " + e.getMessage());
+                    // sc.nextLine();
                     return;
                 }
                 matrices.add(m);
@@ -137,6 +139,7 @@ public class Main {
                     sc.nextLine();
                 } catch (InputMismatchException e) {
                     System.out.print("\nEXCEPTION: You should type integers.");
+                    sc.nextLine();
                     return;
                 }
                 m = new Matrix(row, col);
@@ -165,7 +168,7 @@ public class Main {
         ArrayList<Matrix> Ms = new ArrayList<>();
         System.out.print("Load listing? [Y/N]: ");
         String fchsstr = sc.nextLine();
-        fchsstr = fchsstr.toLowerCase();
+        fchsstr = fchsstr.toLowerCase().trim();
         if (fchsstr.equals("y") || fchsstr.equals("yes") || fchsstr.equals("ye")) {
             try {
                 Ms = load(gpath);
@@ -181,7 +184,7 @@ public class Main {
     public static void askSave(ArrayList<Matrix> Ms, Scanner sc, String gpath) {
         System.out.print("SAVE listing? [Y/N]: ");
         String fchsstr = sc.nextLine();
-        fchsstr = fchsstr.toLowerCase();
+        fchsstr = fchsstr.toLowerCase().trim();
         if (fchsstr.equals("y") || fchsstr.equals("yes") || fchsstr.equals("ye")) {
             try {
                 save(Ms, gpath);
@@ -193,6 +196,7 @@ public class Main {
 
     public static boolean askUser(Scanner sc, String text, String ... cond) {
         System.out.println(text);
+        System.out.print("> ");
         String answerString = sc.nextLine();
         answerString = answerString.toLowerCase().trim();
         for (String c : cond) {
@@ -443,7 +447,7 @@ public class Main {
                     try {
                         result_det = matrices.get(id_det).detGauss();
                     } catch (IllegalArgumentException e) {
-                        System.out.println(e + " You should pick square matrix. Aborting.");
+                        System.err.println(e + " Aborting.");
                         break;
                     } catch (IndexOutOfBoundsException e) {
                         System.err.println("Operation Aborted.");
@@ -530,7 +534,7 @@ public class Main {
                     try {
                         result_inv = matrices.get(id_inv).inversed();
                     } catch (IllegalArgumentException e) {
-                        System.err.println(e + " You should pick square matrix. Aborting.");
+                        System.err.println(e + " Aborting.");
                         break;
                     } catch (IndexOutOfBoundsException e) {
                         System.out.println("Operation Aborted.");
@@ -556,3 +560,4 @@ public class Main {
         }
     }
 }
+// fin.

@@ -55,12 +55,14 @@ public class Matrix {
                     re = scanner.nextDouble();
                     im = scanner.nextDouble();
                 } catch (InputMismatchException e) {
+                    scanner.nextLine();
                     throw new InputMismatchException("Error: You should enter double or integers!");
                 }
                 Complex c = new Complex(re, im);
                 A[row][col] = c;
             }
         }
+        // scanner.nextLine();
     }
 
     private final Random random = new Random();
@@ -94,7 +96,9 @@ public class Matrix {
         }
         double re = Double.parseDouble(body.substring(0, split));
         if (body.substring(split).equals("+") || body.substring(split).equals("-")) {
-            return new Complex(re, 1);
+            String tail = body.substring(split);
+            if (tail.equals("+")) return new Complex(re, 1);
+            if (tail.equals("-")) return new Complex(re, -1);
         }
         double im = Double.parseDouble(body.substring(split));
         return new Complex(re, im);
@@ -174,7 +178,7 @@ public class Matrix {
 
     public Matrix plusw(Matrix B) {
         if (this.Rows != B.Rows || this.Cols != B.Cols) {
-            throw new IllegalArgumentException("Matrices should with similar dimensions.");
+            throw new IllegalArgumentException("Matrices should be with similar dimensions.");
         }
         Matrix C = new Matrix(this.Rows, this.Cols);
         for (int i = 0; i < this.Rows; i++) {

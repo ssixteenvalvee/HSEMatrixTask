@@ -22,7 +22,7 @@ public class Complex {
     // the receiver is never modified!
 
     public boolean isZero() {
-        return Double.compare(Re, 0.0) == 0 && Double.compare(Im, 0.0) == 0;
+        return Re == 0.0 && Im == 0.0;
     }
 
     public Complex conjugate() {
